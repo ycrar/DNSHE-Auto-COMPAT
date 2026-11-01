@@ -2,32 +2,32 @@ name: DNSHE Domain Auto Renew
 
 on:
   schedule:
-    # 表达式说明：分钟 小时 天 月 星期
-    # 0 0 1 * * 表示 UTC 时间每月 1 日 00:00
-    # 对应北京时间 (UTC+8) 为每月 1 日 08:00
+    # 銵刻噢撘秩???? 撠 憭?????
+    # 0 0 1 * * 銵函內 UTC ?園瘥? 1 ??00:00
+    # 撖孵??漪?園 (UTC+8) 銝箸???1 ??08:00
     - cron: '0 0 1 * *'
-  workflow_dispatch: # 依然保留手动触发按钮，方便测试
-
+  workflow_dispatch: # 靘靽??閫血??嚗靘踵?霂?
 jobs:
   renew:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.9'
+          python-version: '3.11'
 
       - name: Install dependencies
         run: pip install requests
 
       - name: Run renew script
         env:
-          # 以下变量需在仓库 Settings -> Secrets -> Actions 中配置
-          # DNSHE 多账号密钥（支持多个账号，编号从 1 开始，最多 10 个）：
-          DNSHE_API_KEY_1: ${{ secrets.DNSHE_API_KEY_1 }}
+          # 隞乩?????其?摨?Settings -> Secrets -> Actions 銝剝?蝵?          # DNSHE 憭揭?瑕??伐??舀?憭葵韐血嚗??瑚? 1 撘憪??憭?10 銝迎?嚗?          DNSHE_API_KEY_1: ${{ secrets.DNSHE_API_KEY_1 }}
           DNSHE_API_SECRET_1: ${{ secrets.DNSHE_API_SECRET_1 }}
           DNSHE_API_KEY_2: ${{ secrets.DNSHE_API_KEY_2 }}
           DNSHE_API_SECRET_2: ${{ secrets.DNSHE_API_SECRET_2 }}
@@ -47,8 +47,7 @@ jobs:
           DNSHE_API_SECRET_9: ${{ secrets.DNSHE_API_SECRET_9 }}
           DNSHE_API_KEY_10: ${{ secrets.DNSHE_API_KEY_10 }}
           DNSHE_API_SECRET_10: ${{ secrets.DNSHE_API_SECRET_10 }}
-          # SMTP 邮件通知（保持原有不变）：
-          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          # SMTP ?桐辣?嚗???????嚗?          SMTP_HOST: ${{ secrets.SMTP_HOST }}
           SMTP_PORT: ${{ secrets.SMTP_PORT }}
           SMTP_USER: ${{ secrets.SMTP_USER }}
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
@@ -57,3 +56,13 @@ jobs:
           SMTP_USE_SSL: ${{ secrets.SMTP_USE_SSL }}
           SMTP_USE_STARTTLS: ${{ secrets.SMTP_USE_STARTTLS }}
         run: python renew_domains.py
+
+      - name: ?踹? GitHub Actions 60 憭拍瘣餃?憭望? (??靽暑)
+        if: always()
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          mkdir -p .github
+          date -u +"%Y-%m-%d %H:%M:%S UTC" > .github/.keepalive
+          git add -f .github/.keepalive
+          git diff --staged --quiet || (git commit -m "chore: keep repository active [skip ci]" && git push || echo "Keepalive commit skipped")
